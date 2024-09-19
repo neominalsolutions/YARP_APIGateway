@@ -20,6 +20,7 @@ namespace API_Gateway.Controllers
       // endpointi değiştirelim // servisi down edip deniyelim.
       var data =  await  this.api1.GetStringAsync("/api1/products");
 
+
       return Ok(data);
     }
 

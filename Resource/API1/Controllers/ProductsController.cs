@@ -12,6 +12,8 @@ namespace API1.Controllers
     {
       // Thread.Sleep(6000);
 
+      throw new Exception("Http Exception");
+
       return Ok("Products");
     }
 

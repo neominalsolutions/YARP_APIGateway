@@ -1,7 +1,10 @@
+using API_Gateway.Recilency;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Polly;
+using Polly.CircuitBreaker;
 using Polly.Extensions.Http;
 using System.Text;
 using Yarp.ReverseProxy.Configuration;
@@ -48,28 +51,18 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
  
 });
 
+
+
 builder.Services.AddHttpClient("api1", opt =>
 {
   opt.BaseAddress = new Uri("https://localhost:5010");
-}).AddPolicyHandler(policy => HttpPolicyExtensions
-            .HandleTransientHttpError()
-            .WaitAndRetryAsync(3, retryAttempt =>
-            {
-              Console.WriteLine("Before Retry");
-              return TimeSpan.FromSeconds(2);
-            }, onRetry: (outcome, timespan, retryCount, context) =>
-            {
-              Console.WriteLine("Yeniden Deneniyor...");
-            })) // 2 saniyede 1 3 kez dene
-.AddPolicyHandler(policy =>
-{
-  return Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(5),(context,timespan,task) =>
-  {
-    Console.WriteLine("Zaman aþýmýna uðradý");
+})
+.AddPolicyHandler(RecilencyPolicyHelper.CreateRetryPolicy(3, TimeSpan.FromSeconds(2)))
+.AddPolicyHandler(RecilencyPolicyHelper.CreateTimeoutPolicy(TimeSpan.FromSeconds(5)))
+.AddPolicyHandler(RecilencyPolicyHelper.CreateCircuitBrakerPolicy(2, TimeSpan.FromSeconds(30))); // 2 kere üst üste hata olursa 30 saniye isteði kesintiye uðrat.
 
-    return Task.CompletedTask;
-  });
-}); // 5 saniye sonra zaman aþýmýna düþ.
+//.AddPolicyHandler(RecilencyPolicyHelper.CreateCircuitBrakerPolicy(2, TimeSpan.FromSeconds(10)));
+
 
 var app = builder.Build();
 

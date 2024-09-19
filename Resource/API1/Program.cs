@@ -1,5 +1,7 @@
+using API_Gateway.Recilency;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Polly.CircuitBreaker;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +29,7 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("Authenticated", policy => policy.RequireAuthenticatedUser());
 });
+
 
 
 
