@@ -1,10 +1,14 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
+using Polly;
+using Polly.Extensions.Http;
 using System.Text;
 using Yarp.ReverseProxy.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
 
 builder.Services.AddReverseProxy()
 .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
@@ -44,6 +48,29 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
  
 });
 
+builder.Services.AddHttpClient("api1", opt =>
+{
+  opt.BaseAddress = new Uri("https://localhost:5010");
+}).AddPolicyHandler(policy => HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .WaitAndRetryAsync(3, retryAttempt =>
+            {
+              Console.WriteLine("Before Retry");
+              return TimeSpan.FromSeconds(2);
+            }, onRetry: (outcome, timespan, retryCount, context) =>
+            {
+              Console.WriteLine("Yeniden Deneniyor...");
+            })) // 2 saniyede 1 3 kez dene
+.AddPolicyHandler(policy =>
+{
+  return Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(5),(context,timespan,task) =>
+  {
+    Console.WriteLine("Zaman aþýmýna uðradý");
+
+    return Task.CompletedTask;
+  });
+}); // 5 saniye sonra zaman aþýmýna düþ.
+
 var app = builder.Build();
 
 app.UseAuthentication();
@@ -52,5 +79,7 @@ app.UseAuthorization();
 app.UseRateLimiter();
 
 app.MapReverseProxy();
+
+app.MapControllers();
 
 app.Run();

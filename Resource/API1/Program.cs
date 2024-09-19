@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseUrls("https://localhost:5010", "https://localhost:5011");
 
-
+builder.Services.AddControllers();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
@@ -28,6 +28,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Authenticated", policy => policy.RequireAuthenticatedUser());
 });
 
+
+
 var app = builder.Build();
 
 app.MapGet("/api1", (HttpContext httpContext) =>
@@ -39,5 +41,7 @@ app.MapGet("/api1", (HttpContext httpContext) =>
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();
