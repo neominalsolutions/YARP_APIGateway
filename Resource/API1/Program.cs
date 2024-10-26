@@ -35,12 +35,21 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+//app.MapGet("/api1", (HttpContext httpContext) =>
+//{
+//  Console.WriteLine(httpContext.Request.Headers["api1-request-header"]);
+
+//    return "API 1";
+//}).RequireAuthorization("Authenticated");
+
+
+// Authentication sürecini gateway üzerinden denemek için kodu bu þekilde tanýmladýk.
 app.MapGet("/api1", (HttpContext httpContext) =>
 {
   Console.WriteLine(httpContext.Request.Headers["api1-request-header"]);
 
-    return "API 1";
-}).RequireAuthorization("Authenticated");
+  return "API 1";
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
