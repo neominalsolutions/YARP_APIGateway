@@ -46,6 +46,8 @@ var app = builder.Build();
 // Authentication sürecini gateway üzerinden denemek için kodu bu þekilde tanýmladýk.
 app.MapGet("/api1", (HttpContext httpContext) =>
 {
+
+
   Console.WriteLine(httpContext.Request.Headers["api1-request-header"]);
 
   return "API 1";

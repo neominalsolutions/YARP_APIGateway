@@ -48,7 +48,7 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
 {
     rateLimiterOptions.AddFixedWindowLimiter("fixed", options =>
     {
-        options.Window = TimeSpan.FromSeconds(10);
+        options.Window = TimeSpan.FromMinutes(1);
         options.PermitLimit = 5;
        
     });
@@ -62,10 +62,9 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
 builder.Services.AddHttpClient("api1", opt =>
 {
   opt.BaseAddress = new Uri("https://localhost:5010");
-});
-//.AddPolicyHandler(RecilencyPolicyHelper.CreateRetryPolicy(3, TimeSpan.FromSeconds(2)))
-//.AddPolicyHandler(RecilencyPolicyHelper.CreateTimeoutPolicy(TimeSpan.FromSeconds(5)))
-//.AddPolicyHandler(RecilencyPolicyHelper.CreateCircuitBrakerPolicy(2, TimeSpan.FromSeconds(30))); // 2 kere üst üste hata olursa 30 saniye isteði kesintiye uðrat.
+}).AddPolicyHandler(RecilencyPolicyHelper.CreateRetryPolicy(3, TimeSpan.FromSeconds(2)))
+ .AddPolicyHandler(RecilencyPolicyHelper.CreateTimeoutPolicy(TimeSpan.FromSeconds(5)))
+ .AddPolicyHandler(RecilencyPolicyHelper.CreateCircuitBrakerPolicy(3, TimeSpan.FromSeconds(30))); // 2 kere üst üste hata olursa 30 saniye isteði kesintiye uðrat.
 
 //.AddPolicyHandler(RecilencyPolicyHelper.CreateCircuitBrakerPolicy(2, TimeSpan.FromSeconds(10)));
 

@@ -16,6 +16,15 @@ namespace API_Gateway.Controllers
     }
 
 
+    [HttpGet("api1PollyTest")]
+    public async Task<IActionResult> Api1PollyTest()
+    {
+      var data = await this.api1.GetStringAsync("/api1");
+
+      return Ok();
+    }
+
+
     [HttpGet]
     public async Task<IActionResult> GetAggregateResponse()
     {
@@ -31,7 +40,7 @@ namespace API_Gateway.Controllers
       {
         // endpointi değiştirelim // servisi down edip deniyelim.
         var data = await this.api1.GetStringAsync("https://localhost:7144/api3");
-        var data2 = await this.api1.GetStringAsync("https://localhost:7211/api2");
+        var data2 = await this.api1.GetStringAsync("https://localhost:7210/api2");
 
        
         responses.Add(data);
